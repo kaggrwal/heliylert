@@ -2,14 +2,14 @@ const puppeteer = require('puppeteer');
 
 (async () => {
     const browser = await puppeteer.launch({
-        headless: true, // Ensures no GUI issues
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
-    await page.goto('https://www.heliyatra.irctc.co.in/');
+    await page.goto('https://www.heliyatra.irctc.co.in/', { waitUntil: 'load' });
 
-    // Example: Check if the "Book Ticket" button is enabled
+    // Check if "Book Ticket" button is enabled
     const isBookingOpen = await page.evaluate(() => {
         const button = document.querySelector('button');
         return button && !button.disabled;
