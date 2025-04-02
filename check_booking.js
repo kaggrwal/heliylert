@@ -2,27 +2,28 @@ const puppeteer = require('puppeteer');
 
 (async () => {
     const browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+        headless: true, // Ensures no GUI issues
+        args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-gpu',
+            '--disable-dev-shm-usage'
+        ]
+    });
 
     const page = await browser.newPage();
-    
-    // Open the booking website
-    await page.goto('https://www.heliyatra.irctc.co.in/', { waitUntil: 'domcontentloaded' });
+    await page.goto('https://www.heliyatra.irctc.co.in/');
 
-    // Wait for the button to load
-    await page.waitForSelector("button", { timeout: 5000 });
-
-    // Find the "Book Ticket" button
+    // Example: Check if the "Book Ticket" button is enabled
     const isBookingOpen = await page.evaluate(() => {
-        const button = [...document.querySelectorAll("button")].find(btn => btn.textContent.includes("Book Ticket"));
-        return button && !button.disabled; // Booking is open if the button is enabled
+        const button = document.querySelector('button');
+        return button && !button.disabled;
     });
 
     if (isBookingOpen) {
-        console.log("🚨 Booking is OPEN! 🚨");
+        console.log('🚨 Booking is OPEN! 🚨');
     } else {
-        console.log("❌ Booking is still CLOSED.");
+        console.log('❌ Booking is still CLOSED.');
     }
 
     await browser.close();
