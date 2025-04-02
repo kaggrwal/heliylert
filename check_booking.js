@@ -3,12 +3,7 @@ const puppeteer = require('puppeteer');
 (async () => {
     const browser = await puppeteer.launch({
         headless: true, // Ensures no GUI issues
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox',
-            '--disable-gpu',
-            '--disable-dev-shm-usage'
-        ]
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
 
     const page = await browser.newPage();
@@ -20,11 +15,7 @@ const puppeteer = require('puppeteer');
         return button && !button.disabled;
     });
 
-    if (isBookingOpen) {
-        console.log('🚨 Booking is OPEN! 🚨');
-    } else {
-        console.log('❌ Booking is still CLOSED.');
-    }
+    console.log(isBookingOpen ? '🚨 Booking is OPEN! 🚨' : '❌ Booking is still CLOSED.');
 
     await browser.close();
 })();
