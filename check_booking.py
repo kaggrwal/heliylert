@@ -1,50 +1,62 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
-import time
 
 URL = "https://www.heliyatra.irctc.co.in/"
 
 def check_booking_status():
-    # Configure Chrome options
     options = Options()
-    options.add_argument("--headless")  # Run in headless mode (no GUI)
+    options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
 
-    # Start Chrome WebDriver
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=options)
 
-    # Open the webpage
-    driver.get(URL)
+    try:
+        # Open the webpage
+        driver.get(URL)
 
-    # Wait for JavaScript content to load
-    time.sleep(5)  # Increase if needed
+        # Wait until at least one button appears
+        WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located((By.TAG_NAME, "button"))
+        )
 
-    # Get page content
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+        # Get all buttons
+        buttons = driver.find_elements(By.TAG_NAME, "button")
 
-    # Find the button by text content
-    buttons = soup.find_all("button")
-    book_button = None
-    for button in buttons:
-        if "Book Ticket" in button.text:
-            book_button = button
-            break
+        # Debug: Print all button texts
+        print("Found buttons:")
+        for button in buttons:
+            print("-", button.text.strip())
 
-    # Close browser
-    driver.quit()
+        # Find the 'Book Ticket' button
+        book_button = None
+        for button in buttons:
+            if "Book Ticket" in button.text:
+                book_button = button
+                break
 
-    if book_button:
-        if "disabled" in book_button.attrs:
-            print("❌ Bookings are still CLOSED.")
+        if book_button:
+            try:
+                # Check if the button is clickable
+                WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.XPATH, "//button[contains(text(),'Book Ticket')]")))
+                print("🚨 Bookings are OPEN! The 'Book Ticket' button is clickable.")
+            except:
+                print("❌ Bookings are still CLOSED. The 'Book Ticket' button is **disabled**.")
         else:
-            print("🚨 Bookings are OPEN!")
-    else:
-        print("Could not find the 'Book Ticket' button.")
+            print("❌ Could not find the 'Book Ticket' button.")
+
+    except Exception as e:
+        print("Error:", e)
+
+    finally:
+        driver.quit()
 
 if __name__ == "__main__":
     check_booking_status()
