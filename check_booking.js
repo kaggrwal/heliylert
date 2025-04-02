@@ -1,19 +1,31 @@
-const { chromium } = require('playwright');
+import requests
+from bs4 import BeautifulSoup
 
-(async () => {
-    const browser = await chromium.launch({
-        headless: true,
-        args: [
-            '--no-sandbox',
-            '--disable-setuid-sandbox'
-        ]
-    });
-    const page = await browser.newPage();
-    await page.goto('https://www.heliyatra.irctc.co.in/', { waitUntil: 'load' });
+URL = "https://www.heliyatra.irctc.co.in/"
 
-    // Check for the "Book Ticket" button status
-    const isBookingOpen = await page.$eval('button', button => !button.disabled);
-    console.log(isBookingOpen ? '🚨 Booking is OPEN! 🚨' : '❌ Booking is still CLOSED.');
+def check_booking_status():
+    response = requests.get(URL)
+    if response.status_code != 200:
+        print("Failed to retrieve the page.")
+        return
 
-    await browser.close();
-})();
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    # Find the button by text content (to ensure we get the correct button)
+    buttons = soup.find_all("button")
+    book_button = None
+    for button in buttons:
+        if "Book Ticket" in button.text:
+            book_button = button
+            break
+
+    if book_button:
+        if "disabled" in book_button.attrs:
+            print("❌ Bookings are still CLOSED.")
+        else:
+            print("🚨 Bookings are OPEN!")
+    else:
+        print("Could not find the 'Book Ticket' button.")
+
+if __name__ == "__main__":
+    check_booking_status()
