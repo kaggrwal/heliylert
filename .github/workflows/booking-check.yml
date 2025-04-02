@@ -1,21 +1,20 @@
-name: Check Booking Status
+name: Check Booking Status with Playwright
 
 on:
   schedule:
-    - cron: "*/30 * * * *"  # Runs every 30 minutes
-  workflow_dispatch:  # Allows manual trigger
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
 
 jobs:
   scrape:
     runs-on: ubuntu-latest
-    container: ghcr.io/puppeteer/puppeteer:latest  # Use the official Puppeteer container
 
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
 
     - name: Install Node.js dependencies
-      run: npm install
+      run: npm install playwright
 
-    - name: Run scraper
-      run: node check_booking.js
+    - name: Run Playwright scraper
+      run: node check_booking_playwright.js
