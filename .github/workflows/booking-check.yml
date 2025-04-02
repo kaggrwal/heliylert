@@ -1,0 +1,24 @@
+name: Check Booking Status
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # Runs every 30 minutes
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install puppeteer
+
+    - name: Run scraper
+      run: node check_booking.js
